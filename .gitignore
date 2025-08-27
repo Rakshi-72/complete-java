@@ -27,6 +27,14 @@ out/
 *.jar
 *.war
 *.ear
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.properties
+dependency-reduced-pom.xml
+release.properties
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
 
 # Logs and databases
 *.log
@@ -52,3 +60,4 @@ payara*/
 liberty*/
 tmp/
 work/
+
