@@ -20,7 +20,10 @@ import java.util.Set;
 @Builder
 @Setter
 @Getter
-@Table(name = "users", indexes = {})
+@Table(name = "users", indexes = {
+        @Index(name = "idx_user_email", columnList = "email", unique = true),
+        @Index(name = "idx_user_phone", columnList = "phoneNumber", unique = true)
+})
 public class User {
     @Id
     private String userId;
@@ -83,6 +86,7 @@ public class User {
     private Address address;
 
 
+    //   TODO : id is getting started from 0 again after restarting the server, need to fix this
     @PrePersist
     private void generateUserId() {
         if (this.userId == null)
@@ -95,7 +99,6 @@ public class User {
         this.deleted = false;
         this.failedLoginAttempts = 0;
         this.twoFactorEnabled = false;
-
     }
 
 }
