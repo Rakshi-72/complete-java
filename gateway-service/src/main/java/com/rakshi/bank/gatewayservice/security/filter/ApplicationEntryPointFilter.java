@@ -34,14 +34,14 @@ public class ApplicationEntryPointFilter implements WebFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
-        log.info("Request URI: {}", path);
+        log.debug("Processing request for path: {}", path);
 
-        // Skip public endpoints
-        if (isPublicEndpoint(path)) {
-            log.info("Public endpoint, skipping authentication");
+        if (isPublicEndpoint(path) || !path.startsWith("/api")) {
+            log.info("Public or non-API endpoint, skipping authentication: {}", path);
             return chain.filter(exchange);
         }
 
+        log.info("Requiring authentication for API path: {}", path);
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         String jwt = extractToken(authHeader);
 

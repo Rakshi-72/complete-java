@@ -11,6 +11,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.stream.Collectors;
 
@@ -43,6 +44,14 @@ public class UserExceptionHandler {
         return result.getFieldErrors().stream()
                 .collect(Collectors.groupingBy(FieldError::getField,
                         Collectors.mapping(FieldError::getDefaultMessage, Collectors.toList())));
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    @WrapError(error = "Resource not found", status = HttpStatus.NOT_FOUND, apiStatus = ApiStatus.NOT_FOUND)
+    public Object handleResourceNotFoundException(NoResourceFoundException exception) {
+        exception.printStackTrace();
+        log.error("Resource not found");
+        return exception.getMessage();
     }
 
     @ExceptionHandler(Exception.class)
