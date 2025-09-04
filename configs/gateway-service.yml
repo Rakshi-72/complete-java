@@ -19,12 +19,12 @@ spring:
             - id: account-service
               uri: lb://account-service
               predicates:
-                - Path=/account/**
+                - Path=/api/account/**
             - id: auth-service
               uri: lb://auth-service
               predicates:
-                - Path=/auth/**,/public/auth/**
+                - Path=/api/auth/**,/api/public/auth/**
             - id: user-service
               uri: lb://user-service
               predicates:
-                - Path=/user/**,/public/users/**
+                - Path=/api/user/**,/api/public/users/**

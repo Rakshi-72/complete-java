@@ -1,5 +1,6 @@
 package com.rakshi.bank.domains.dto.response;
 
+import java.io.Serializable;
 import java.util.List;
 
 public record PaginatedResponse<T>(
@@ -12,5 +13,5 @@ public record PaginatedResponse<T>(
         boolean last,
         boolean hasNext,
         boolean hasPrevious
-) {
+) implements Serializable {
 }
