@@ -22,24 +22,17 @@ public class SecurityConfiguration {
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         return http
-                // disable defaults
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .logout(ServerHttpSecurity.LogoutSpec::disable)
-
-                // stateless
                 .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
-
-                // authorization rules
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers(PUBLIC_ENDPOINTS.toArray(new String[0])).permitAll()
-                        .anyExchange().authenticated()
+                        .pathMatchers("/api/account/**", "/api/auth/**", "/api/user/**").authenticated()
+                        .anyExchange().permitAll() // This allows all other requests
                 )
-
-                // add our JWT filter
                 .addFilterAt(jwtAuthenticationWebFilter, SecurityWebFiltersOrder.AUTHENTICATION)
-
                 .build();
     }
 }
