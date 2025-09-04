@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.rakshi.bank.domains.dto.commons.ApiStatus;
 import lombok.Builder;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -18,5 +19,5 @@ public record ApiResponse<T>(
 
         @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
         LocalDateTime timestamp
-) {
+) implements Serializable {
 }

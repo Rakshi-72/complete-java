@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.rakshi.bank.domains.enums.CustomerType;
 import com.rakshi.bank.domains.enums.KycStatus;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 public record UserSummaryResponse(
@@ -19,5 +20,5 @@ public record UserSummaryResponse(
 
         @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
         LocalDateTime createdAt
-) {
+) implements Serializable {
 }

@@ -1,6 +1,8 @@
 package com.rakshi.bank.domains.dto.commons;
 
-public enum ApiStatus {
+import java.io.Serializable;
+
+public enum ApiStatus implements Serializable {
     SUCCESS,
     FAILURE,
     ERROR,

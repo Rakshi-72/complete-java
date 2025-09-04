@@ -10,6 +10,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -24,7 +25,7 @@ import java.util.Set;
         @Index(name = "idx_user_email", columnList = "email", unique = true),
         @Index(name = "idx_user_phone", columnList = "phoneNumber", unique = true)
 })
-public class User {
+public class User implements Serializable {
     @Id
     private String userId;
     private String firstName;

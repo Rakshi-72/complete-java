@@ -1,6 +1,8 @@
 package com.rakshi.bank.domains.enums;
 
-public enum KycStatus {
+import java.io.Serializable;
+
+public enum KycStatus implements Serializable {
     PENDING,
     APPROVED,
     REJECTED,

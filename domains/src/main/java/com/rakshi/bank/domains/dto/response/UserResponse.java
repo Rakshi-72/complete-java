@@ -5,6 +5,7 @@ import com.rakshi.bank.domains.enums.CustomerType;
 import com.rakshi.bank.domains.enums.Gender;
 import com.rakshi.bank.domains.enums.KycStatus;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -46,5 +47,5 @@ public record UserResponse(
         String createdBy,
         String updatedBy,
         AddressResponse address
-) {
+) implements Serializable {
 }
