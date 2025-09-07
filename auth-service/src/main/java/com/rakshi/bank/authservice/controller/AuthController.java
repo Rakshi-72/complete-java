@@ -1,7 +1,7 @@
 package com.rakshi.bank.authservice.controller;
 
-import com.rakshi.bank.authservice.dto.request.LoginRequest;
 import com.rakshi.bank.authservice.service.AuthService;
+import com.rakshi.bank.domains.dto.request.LoginRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
