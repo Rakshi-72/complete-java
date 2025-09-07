@@ -1,19 +1,23 @@
 server:
   port: 8083
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
+  ssl:
+    enabled: true
+    client-auth: want
+    key-store: ${gateway.keystore.path}
+    key-store-password: ${gateway.keystore.password}
+    trust-store: ${gateway.truststore.path}
+    trust-store-password: ${gateway.truststore.password}
 
 spring:
+  application:
+    name: gateway-service
   cloud:
     gateway:
       server:
         webflux:
           discovery:
             locator:
-              enabled: false
+              enabled: true
               lower-case-service-id: true
           routes:
             - id: account-service
@@ -28,3 +32,13 @@ spring:
               uri: lb://user-service
               predicates:
                 - Path=/api/users/**,/api/public/users/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+    secure-port-enabled: true
+    secure-port: ${server.port}
+    non-secure-port-enabled: false
