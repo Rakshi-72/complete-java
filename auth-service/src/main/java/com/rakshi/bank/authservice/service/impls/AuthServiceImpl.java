@@ -1,10 +1,10 @@
 package com.rakshi.bank.authservice.service.impls;
 
-import com.rakshi.bank.authservice.dto.request.LoginRequest;
 import com.rakshi.bank.authservice.dtos.JwtResponse;
 import com.rakshi.bank.authservice.security.jwt.JwtUtil;
 import com.rakshi.bank.authservice.service.AuthService;
 import com.rakshi.bank.domains.dto.commons.ApiStatus;
+import com.rakshi.bank.domains.dto.request.LoginRequest;
 import com.rakshi.bank.domains.dto.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;

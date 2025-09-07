@@ -35,6 +35,7 @@ release.properties
 pom.xml.releaseBackup
 pom.xml.versionsBackup
 pom.xml.next
+cert.py
 
 # Logs and databases
 *.log

@@ -1,4 +1,4 @@
-package com.rakshi.bank.authservice.dto.request;
+package com.rakshi.bank.domains.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
