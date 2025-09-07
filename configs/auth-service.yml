@@ -1,7 +1,19 @@
 server:
   port: 8082
+  ssl:
+    enabled: true
+    client-auth: need
+    key-store: ${auth.keystore.path}
+    key-store-password: ${auth.keystore.password}
+    trust-store: ${auth.truststore.path}
+    trust-store-password: ${auth.truststore.password}
 
 eureka:
+  instance:
+    prefer-ip-address: true
+    secure-port-enabled: true
+    secure-port: ${server.port}
+    non-secure-port-enabled: false
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
