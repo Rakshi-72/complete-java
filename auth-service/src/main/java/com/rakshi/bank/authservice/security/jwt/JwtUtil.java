@@ -1,7 +1,7 @@
 package com.rakshi.bank.authservice.security.jwt;
 
-import com.rakshi.bank.authservice.dto.request.LoginRequest;
 import com.rakshi.bank.authservice.service.UserService;
+import com.rakshi.bank.domains.dto.request.LoginRequest;
 import com.rakshi.bank.domains.enums.Roles;
 import com.rakshi.bank.domains.models.Role;
 import io.jsonwebtoken.Jwts;
@@ -44,7 +44,6 @@ public class JwtUtil {
                 .map(Role::getRole)
                 .map(Roles::toString)
                 .collect(Collectors.joining("\\|"));
-
 
         log.info("Generating JWT token for user: {}", username);
         return Jwts.builder()

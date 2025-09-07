@@ -1,12 +1,26 @@
 server:
   port: 8084
+  ssl:
+    enabled: true
+    client-auth: need
+    key-store: ${users.keystore.path}
+    key-store-password: ${users.keystore.password}
+    trust-store: ${users.truststore.path}
+    trust-store-password: ${users.truststore.password}
+
+spring:
+  application:
+    name: user-service
+    jpa:
+      hibernate:
+        ddl-auto: update
 
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
-
-spring:
-  jpa:
-    hibernate:
-      ddl-auto: update
+  instance:
+    prefer-ip-address: true
+    non-secure-port-enabled: false
+    secure-port-enabled: true
+    secure-port: ${server.port}
