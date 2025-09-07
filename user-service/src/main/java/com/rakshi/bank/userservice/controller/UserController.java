@@ -1,6 +1,7 @@
 package com.rakshi.bank.userservice.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -9,7 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     @GetMapping("/hello")
-    public String hello() {
+    public String hello(@RequestHeader("x-username") String useString) {
+        System.out.println(useString);
         return "Hello World";
     }
 
