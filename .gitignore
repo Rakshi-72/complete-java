@@ -43,6 +43,10 @@ credentials/
 *.log
 *.sqlite
 *.db
+*.crt
+*.key
+*.srl
+*.pem
 
 # System-specific files
 .DS_Store
