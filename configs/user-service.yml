@@ -9,18 +9,12 @@ server:
     trust-store-password: ${users.truststore.password}
 
 spring:
+  config:
+    import:
+      - eureka-config.yml
+      - database-config.yml
   application:
     name: user-service
     jpa:
       hibernate:
         ddl-auto: update
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
-  instance:
-    prefer-ip-address: true
-    non-secure-port-enabled: false
-    secure-port-enabled: true
-    secure-port: ${server.port}

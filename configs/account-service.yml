@@ -8,12 +8,8 @@ server:
     trust-store: ${accounts.truststore.path}
     trust-store-password: ${accounts.truststore.password}
 
-eureka:
-  instance:
-    prefer-ip-address: true
-    secure-port-enabled: true
-    secure-port: ${server.port}
-    non-secure-port-enabled: false
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
+spring:
+  config:
+    import:
+      - eureka-config.yml
+      - database-config.yml
