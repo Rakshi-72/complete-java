@@ -8,16 +8,13 @@ server:
     trust-store: ${auth.truststore.path}
     trust-store-password: ${auth.truststore.password}
 
-eureka:
-  instance:
-    prefer-ip-address: true
-    secure-port-enabled: true
-    secure-port: ${server.port}
-    non-secure-port-enabled: false
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
+
 spring:
+  config:
+    import:
+      - eureka-config.yml
+      - security-config.yml
+      - database-config.yml
   cache:
     type: redis
   data:
