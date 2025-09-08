@@ -9,6 +9,10 @@ server:
     trust-store-password: ${gateway.truststore.password}
 
 spring:
+  config:
+    import:
+      - eureka-config.yml
+      - security-config.yml
   application:
     name: gateway-service
   cloud:
@@ -32,13 +36,3 @@ spring:
               uri: lb://user-service
               predicates:
                 - Path=/api/users/**,/api/public/users/**
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
-  instance:
-    prefer-ip-address: true
-    secure-port-enabled: true
-    secure-port: ${server.port}
-    non-secure-port-enabled: false
