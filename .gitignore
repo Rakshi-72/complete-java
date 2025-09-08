@@ -37,6 +37,7 @@ pom.xml.versionsBackup
 pom.xml.next
 cert.py
 certificates/certs/
+credentials/
 
 # Logs and databases
 *.log
