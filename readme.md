@@ -1,219 +1,251 @@
-# Microservices Project – README
+# Complete Java Monorepo Documentation
 
-Welcome! This repository contains a Java microservices system built with Spring Boot, Spring Cloud, Jakarta EE (
-jakarta.* imports), Spring Data JPA, Lombok, and Java 20. It is organized as multiple services with centralized
-configuration and service discovery.
+This document provides an end-to-end overview of the complete Java monorepo, covering architecture, modules, configuration, security, error handling, build and run instructions, API conventions, and operational practices. It is intended for developers, DevOps engineers, and reviewers onboarding to the project.
 
-## Features at a glance
+## High-level Architecture
 
-- Multiple independently deployable services (auth, account, user, etc.)
-- Centralized configuration via Config Server (YAML files under configs/)
-- Service discovery and registration
-- API gateway for edge routing
-- TLS/mutual TLS support (see Security section)
-- Database configuration centralized
-- Shared DTOs/Models module
+- Service Discovery: Centralized Eureka server for service registration and discovery.
+- API Gateway: Spring Cloud Gateway for request routing, central error handling, and cross-cutting concerns.
+- Config Server: Centralized Spring Cloud Config for externalized per-service configuration.
+- Domain/DTO Layer: Shared domain models and DTOs for cross-service interoperability.
+- Business Services:
+  - Auth Service: Authentication, token issuance, and identity verification.
+  - User Service: User identity operations and user data access.
+  - Account Service: Account-related domain logic and persistence.
+- Security: Spring Security with header-based context propagation, TLS/mTLS between services.
+- Observability: Centralized, structured logging; consistent error payloads.
 
-## Repository structure
+## Repository Structure
 
-- config-server — Spring Cloud Config Server application
-- service-discovery — Service registry (e.g., Eureka Server)
-- gateway-service — API gateway for routing to downstream services
-- auth-service — Authentication/authorization service
-- account-service — Account domain service
-- user-service — User domain service
-- models-and-dtos — Shared models and DTOs across services
-- domains — Domain-related shared artifacts (if applicable)
-- configs — Centralized configuration (YAMLs) served by the Config Server
-- certificates, credentials — Development certs/keystores/truststores (or placeholders)
+- config-server: Spring Cloud Config Server that serves configuration for all services.
+- service-discovery: Eureka Server for service registration/discovery.
+- gateway-service: Spring Cloud Gateway instance fronting downstream services. Includes global error handling and status mapping.
+- auth-service: Authentication and token management service.
+- user-service: User management, identity search, and validations; integrates security and custom exception handling.
+- account-service: Account domain operations (CRUD, queries).
+- domains and/or models-and-dtos: Shared model and DTO definitions for cross-service contracts.
+- configs: Externalized configuration repository consumed by config-server.
+- certificates and credentials: Keystores, truststores, and secrets locations for TLS/mTLS and secure service communication.
+- flow-diagrams: Architecture and flow charts.
+- logs: Central or local log outputs.
 
-## Tech stack
+Note: Some directories may be used at runtime or as external resources. Sensitive contents are ignored by VCS via .gitignore where appropriate.
+
+## Technology Stack
 
 - Java 20
-- Spring Boot and Spring Cloud (Gateway, Discovery, Config)
-- Jakarta EE (jakarta.* imports)
+- Spring Boot (Reactive Gateway)
+- Spring Cloud (Gateway, Config, Eureka)
+- Spring Security
 - Spring Data JPA
-- Lombok
+- Jakarta EE (jakarta.* imports)
+- Lombok for boilerplate reduction
 
-## Centralized configuration
+## Service Responsibilities
 
-Each service consumes its configuration from the Config Server. The repository includes environment-specific YAMLs under
-configs/. For example, user-service is configured to:
+- service-discovery (Eureka Server)
+  - Hosts registry for dynamic service lookup.
+  - Downstream services register and fetch peer locations.
 
-- Enable SSL
-- Require mutual TLS (client-auth)
-- Import shared config fragments for discovery and database
+- config-server
+  - Serves centralized configuration from configs/.
+  - Supports environment-specific and service-specific profiles.
 
-Example (configs/user-service.yml):
+- gateway-service
+  - Routes public traffic to internal services via discovery.
+  - Provides centralized error handling with standardized JSON payloads.
+  - Can enforce cross-cutting policies (e.g., authentication headers, rate limiting if configured).
 
-```yaml
-# yaml
-server:
-  port: 8084
-  ssl:
-    enabled: true
-    client-auth: need
-    key-store: ${users.keystore.path}
-    key-store-password: ${users.keystore.password}
-    trust-store: ${users.truststore.path}
-    trust-store-password: ${users.truststore.password}
+- auth-service
+  - Issues tokens and manages authentication flows.
+  - Can validate identity and roles for downstream service consumption.
 
-spring:
-  config:
-    import:
-      - eureka-config.yml
-      - database-config.yml
-  application:
-    name: user-service
-    jpa:
-      hibernate:
-        ddl-auto: update
-```
+- user-service
+  - Exposes identity-based user retrieval.
+  - Uses Spring Security to build the SecurityContext from propagated headers (e.g., x-username, x-roles).
+  - Employs tailored exception handlers returning consistent error shapes and statuses.
 
-Shared fragments include:
+- account-service
+  - Manages account entities and related operations.
+  - Integrates with service-discovery and config-server for dynamic configuration.
 
-- eureka-config.yml — service discovery client configuration
-- database-config.yml — datasource and JPA configuration for services
-- Additional per-service files exist under configs/ for gateway, auth, account, and discovery
+- domains/models-and-dtos
+  - Provides shared types for request/response payloads.
+  - Enables consistent serialization between services.
 
-Tip: Check configs/*.yml to see the effective ports, profiles, and any service-specific flags.
+## Configuration and Secrets
 
-## Prerequisites
+- configs/: Contains YAML/property files consumed by the config-server. This enables per-environment overrides (e.g., application.yml, application-dev.yml).
+- certificates/: Holds truststores and keystores supporting TLS/mTLS between services.
+- credentials/: Reserved for environment-specific sensitive data (ignored by VCS). Ensure local copies are populated through your secret management process.
 
-- Java 20
-- Maven 3.9+
-- Valid certificates/keystores if running TLS/mTLS locally (see Security)
+Important:
+- Do not commit live credentials or private keys.
+- Validate certificate alignment between gateway-service and user-service for mTLS when enabled.
+- Keep config-server pointed to the correct branch/path of configs/.
 
-## Build
+## Security Model
 
-From the repository root:
+- Service-to-Service Transport:
+  - TLS/mTLS between gateway and downstream services can be enabled using certificates and keystores.
+  - Configure keystore/truststore paths and passwords in the corresponding application configuration files served by config-server.
 
+- Propagated Identity:
+  - Gateway or edge components forward headers such as x-username and x-roles to downstream services.
+  - Downstream services (e.g., user-service) reconstruct the Spring Security context from these headers for authorization decisions.
+
+- Authorization:
+  - Roles are represented as delimited values (e.g., “ROLE_ADMIN|ROLE_USER”) in headers.
+  - Downstream services can use role-based access checks at controller or method levels.
+
+- Token Handling:
+  - Auth service issues tokens; gateway and services can validate/propagate identity based on your chosen flow.
+
+## Error Handling and API Conventions
+
+- Gateway:
+  - Central error handler standardizes JSON error responses across the edge.
+  - Maps known framework exceptions to appropriate HTTP statuses and friendly messages.
+  - Ensures consistent content-type application/json and UTF-8 encoding.
+
+- Services:
+  - Each service should implement a lightweight @ControllerAdvice for application-specific exceptions and validation errors, ensuring:
+    - Human-readable messages.
+    - Distinct HTTP status codes per error condition (e.g., 400, 403, 404, 409, 500).
+  - Validation errors return structured field-level messages.
+
+- Response Shape:
+  - Errors typically return an object with fields like: status, error, message.
+  - Successful responses can be wrapped consistently (if using a wrapper annotation/convention).
+
+## Build and Run
+
+Prerequisites:
+- JDK 20 installed and selected.
+- Maven or Gradle configured (use the project’s chosen build tool).
+- Ports for gateway, eureka, and config-server available.
+- Optionally: Docker and Docker Compose for containerized runs.
+
+Typical Local Run Order:
+1) Start config-server
+2) Start service-discovery
+3) Start gateway-service
+4) Start downstream services (auth-service, user-service, account-service)
+
+Example with Maven:
 ```shell script
-# bash
-mvn -q -DskipTests clean install
-```
+# 1) Build the entire repo
+mvn clean install -DskipTests
 
-## Run order (recommended)
-
-1. Config Server
-2. Service Discovery
-3. Gateway
-4. Domain services (auth, user, account, etc.)
-
-Start each service from its directory (or with your IDE’s Run Configuration):
-
-```shell script
-# bash
-# 1) config-server
+# 2) Start Config Server
 cd config-server
 mvn spring-boot:run
 
-# 2) service-discovery
+# 3) Start Eureka Server
 cd ../service-discovery
 mvn spring-boot:run
 
-# 3) gateway-service
+# 4) Start Gateway
 cd ../gateway-service
 mvn spring-boot:run
 
-# 4) downstream services
+# 5) Start user-service, auth-service, account-service (in separate terminals)
+cd ../user-service && mvn spring-boot:run
 cd ../auth-service && mvn spring-boot:run
 cd ../account-service && mvn spring-boot:run
-cd ../user-service && mvn spring-boot:run
 ```
 
-Notes:
 
-- Ensure the Config Server is correctly pointing to the configs/ directory or to the intended Git repository containing
-  these YAMLs.
-- Ensure environment variables/secrets for SSL and database are provided before launching services.
+Environment Variables / JVM Options:
+- Configure keystore/truststore paths and passwords via environment variables or application properties.
+- Ensure the config-server can reach configs/. If using Git-backed config, confirm repo URL and branch.
 
-## Security and TLS/mTLS
+## Routing and Service Discovery
 
-The system supports TLS, and some services may require mutual TLS (client-auth). For example, user-service is configured
-with client-auth: need, meaning:
+- Gateway routes are configured to discover services via Eureka and forward requests appropriately.
+- Patterns and predicates can be adjusted in gateway configuration (served by config-server).
+- Downstream services register to Eureka with service names; the gateway uses these IDs for routing.
 
-- The server presents its certificate (key-store)
-- The client must present a valid certificate (trust-store validation)
+## Data Access and Persistence
 
-Environment variables expected by services (example for user-service):
+- Spring Data JPA used for repository interfaces and CRUD operations.
+- Read-only operations can be annotated with @Transactional(readOnly = true).
+- Prefer Optional for nullable lookups to avoid null handling pitfalls.
+- Ensure database connection properties are externalized via config-server per environment.
 
-- users.keystore.path
-- users.keystore.password
-- users.truststore.path
-- users.truststore.password
+## Observability and Logging
 
-Set them before running:
+- Structured logging with clear error messages and exception types across gateway and services.
+- Centralized logging configuration can be managed via config-server.
+- Consider integrating metrics and tracing (e.g., Micrometer, OpenTelemetry) if required; wire exporters via configuration.
 
-```shell script
-# bash
-export users.keystore.path=/absolute/path/to/user-service-keystore.p12
-export users.keystore.password=changeit
-export users.truststore.path=/absolute/path/to/user-service-truststore.p12
-export users.truststore.password=changeit
-```
+## Local Development Tips
 
-If you use different names per service, refer to the corresponding service YAML under configs/ for the exact
-placeholders and properties.
+- Use JVM debug ports for gateway and services to step through routing and security context propagation.
+- For mTLS testing, verify certificate chains and ensure both truststores and keystores are correctly configured.
+- If services fail to register/discover, check:
+  - Eureka server availability.
+  - Correct eureka.client.serviceUrl.defaultZone in service configs.
+- If config-server doesn’t serve properties, confirm:
+  - Correct spring.cloud.config.server.git.uri or native file system backend pointing to configs/.
+  - Matching spring.application.name and active profiles.
 
-Certificates and keystores:
+## Testing Strategy
 
-- Development artifacts may be kept under certificates/ and credentials/
-- You can generate self-signed certificates for local testing using keytool or OpenSSL. Ensure CN/SANs match the
-  hostname you use.
+- Unit Tests:
+  - Focus on service layer and repository logic.
+  - Validate exception handlers return expected payloads and statuses.
 
-Example curl with mutual TLS to user-service (adjust paths, host, and port):
+- Integration Tests:
+  - Validate routing through gateway to services.
+  - Test mTLS handshake when enabled.
+  - Verify identity propagation and role-based access.
 
-```shell script
-# bash
-curl "https://localhost:8084/actuator/health" \
-  --cert client.crt \
-  --key client.key \
-  --cacert ca.crt
-```
+- Contract/DTO Tests:
+  - Ensure changes to shared DTOs remain backward-compatible or include versioned endpoints.
 
-## Database
+## Deployment Considerations
 
-Database configuration is centralized in configs/database-config.yml and imported into services that need persistence.
-Provide the appropriate environment variables (JDBC URL, username, password) or override the properties via profiles.
-
-Typical steps:
-
-- Start your database locally
-- Set the required datasource environment variables
-- Launch the services
-
-## Service discovery and gateway
-
-- The service discovery server exposes a dashboard where registered services can be observed.
-- The gateway forwards external traffic to internal services. Routes, filters, and SSL settings are configured in
-  configs/gateway-service.yml.
-
-Refer to configs/ for the assigned ports and routing paths.
-
-## Development tips
-
-- Use your IDE’s Lombok plugin.
-- Ensure the project SDK is set to Java 20.
-- If you run services from your IDE, make sure Run/Debug configurations inherit the required environment
-  variables/secrets for SSL and database.
-- When changing configs/*.yml, refresh or restart the affected services (depending on whether Spring Cloud Bus/refresh
-  is set up).
+- Externalize all environment-specific values (endpoints, credentials, keystores) via config-server.
+- Start order in production:
+  1) Config server
+  2) Service discovery
+  3) Gateway
+  4) Downstream services
+- Use liveness/readiness probes for orchestration platforms (Kubernetes) to maintain rollout safety.
+- Rotate certificates periodically; automate distribution through secret management.
 
 ## Troubleshooting
 
-- SSL handshake failures: verify keystore/truststore paths and passwords, certificate validity, and that client-auth
-  matches your scenario.
-- Service not registering/discoverable: confirm discovery client configuration is imported and discovery server is
-  running.
-- Config not applied: ensure Config Server is running and the services can reach it. Check application name and profile
-  alignment with files under configs/.
-- Database connection errors: confirm reachable database, correct credentials, and driver settings.
+- 503 from Gateway for downstream NotFound exceptions:
+  - The gateway maps certain exceptions to Service Unavailable by design; check downstream service availability.
+- 401/403 on services:
+  - Ensure x-username and x-roles headers are propagated, and downstream security filter is active.
+- Validation errors:
+  - Inspect response payload for field-level messages; correct client request shapes accordingly.
+- Service not discovered:
+  - Confirm registration status in Eureka dashboard and that the correct service ID is referenced by the gateway.
 
-## Contributing
+## Governance and Best Practices
 
-- Create feature branches
-- Use meaningful commit messages
-- Add/update configuration under configs/ as needed
-- Open a PR with a clear description and test steps
+- Keep shared DTOs stable; introduce new fields as optional or add versioned endpoints when breaking changes are necessary.
+- Centralize cross-cutting concerns (security policies, error shapes) at the gateway whenever feasible.
+- Aim for idempotent APIs for robustness, especially in distributed environments.
+- Document any new endpoints in a consolidated API catalog.
 
+## Glossary
+
+- Eureka: Netflix OSS service discovery used via Spring Cloud.
+- Spring Cloud Gateway: Reactive gateway framework for routing and filtering.
+- Config Server: Centralized configuration server serving properties/yaml to clients.
+- mTLS: Mutual TLS, requiring both server and client to present valid certificates.
+- DTO: Data Transfer Object shared between services.
+
+## Next Steps
+
+- Add API reference documentation per service (OpenAPI/Swagger recommended).
+- Define standard headers beyond x-username and x-roles (e.g., correlation IDs).
+- Integrate distributed tracing for full request visibility across gateway and services.
+- Establish CI/CD pipelines for build, test, and deploy, with secrets managed securely.
+
+If you want, I can tailor this document with concrete port mappings, exact configuration property names, and example requests/responses based on your current environment and conventions.
