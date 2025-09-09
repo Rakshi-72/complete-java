@@ -8,5 +8,6 @@ public interface ExceptionMessages {
     String USER_ALREADY_EXISTS_BY_EMAIL = "User already exists with email %s";
     String USER_NOT_FOUND_BY_EMAIL = "User not found with email %s";
     String USER_REGISTRATION_FAILED = "User registration failed";
-
+    String INVALID_IDENTITY = "Invalid identity %s";
+    String PERMISSION_DENIED = "Permission denied";
 }
