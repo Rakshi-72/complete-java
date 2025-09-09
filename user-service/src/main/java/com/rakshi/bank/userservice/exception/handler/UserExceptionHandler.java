@@ -1,8 +1,7 @@
 package com.rakshi.bank.userservice.exception.handler;
 
 import com.rakshi.bank.domains.dto.commons.ApiStatus;
-import com.rakshi.bank.userservice.exception.exceptions.UserAlreadyExistsException;
-import com.rakshi.bank.userservice.exception.exceptions.UserRegistrationException;
+import com.rakshi.bank.userservice.exception.exceptions.*;
 import com.rakshi.bank.userservice.utils.annotations.WrapError;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -19,47 +18,64 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserExceptionHandler {
 
-    @ExceptionHandler(UserAlreadyExistsException.class)
-    @WrapError(error = "User already exists", status = HttpStatus.CONFLICT, apiStatus = ApiStatus.CONFLICT)
-    public Object handleUserAlreadyExistsException(UserAlreadyExistsException exception) {
-        log.error("User already exists");
-        exception.printStackTrace();
-        return exception.getMessage();
+
+    private Object handle(Exception ex, String logMessage) {
+        log.error(logMessage, ex);
+        return ex.getMessage();
     }
 
-    @WrapError(error = "Registration failed", status = HttpStatus.CONFLICT, apiStatus = ApiStatus.CONFLICT)
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    @WrapError(error = "User already exists", status = HttpStatus.CONFLICT, apiStatus = ApiStatus.CONFLICT)
+    public Object handleUserAlreadyExists(UserAlreadyExistsException ex) {
+        return handle(ex, "User already exists");
+    }
+
     @ExceptionHandler(UserRegistrationException.class)
-    public Object handleUserRegistrationException(UserRegistrationException exception) {
-        exception.printStackTrace();
-        log.error("User registration failed");
-        return exception.getMessage();
+    @WrapError(error = "Registration failed", status = HttpStatus.CONFLICT, apiStatus = ApiStatus.CONFLICT)
+    public Object handleUserRegistration(UserRegistrationException ex) {
+        return handle(ex, "User registration failed");
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    @WrapError(error = "invalid request data")
-    public Object handleValidationException(MethodArgumentNotValidException exception) {
-        exception.printStackTrace();
-        log.error("Validation failed");
-        BindingResult result = exception.getBindingResult();
+    @WrapError(error = "Invalid request data")
+    public Object handleValidation(MethodArgumentNotValidException ex) {
+        log.error("Validation failed", ex);
+        BindingResult result = ex.getBindingResult();
         return result.getFieldErrors().stream()
-                .collect(Collectors.groupingBy(FieldError::getField,
-                        Collectors.mapping(FieldError::getDefaultMessage, Collectors.toList())));
+                .collect(Collectors.groupingBy(
+                        FieldError::getField,
+                        Collectors.mapping(FieldError::getDefaultMessage, Collectors.toList())
+                ));
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
     @WrapError(error = "Resource not found", status = HttpStatus.NOT_FOUND, apiStatus = ApiStatus.NOT_FOUND)
-    public Object handleResourceNotFoundException(NoResourceFoundException exception) {
-        exception.printStackTrace();
-        log.error("Resource not found");
-        return exception.getMessage();
+    public Object handleResourceNotFound(NoResourceFoundException ex) {
+        return handle(ex, "Resource not found");
+    }
+
+    @ExceptionHandler(InvalidIdentity.class)
+    @WrapError(error = "Find by identity failed", status = HttpStatus.BAD_REQUEST, apiStatus = ApiStatus.BAD_REQUEST)
+    public Object handleInvalidIdentity(InvalidIdentity ex) {
+        return handle(ex, "Find by identity failed");
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    @WrapError(error = "Find by identity failed", status = HttpStatus.NOT_FOUND, apiStatus = ApiStatus.NOT_FOUND)
+    public Object handleUserNotFound(UserNotFoundException ex) {
+        return handle(ex, "User not found");
+    }
+
+    @ExceptionHandler(PermissionNotPassedException.class)
+    @WrapError(error = "Find by identity failed", status = HttpStatus.FORBIDDEN, apiStatus = ApiStatus.UNAUTHORIZED)
+    public Object handlePermissionNotValid(PermissionNotPassedException ex) {
+        return handle(ex, "Permission not satisfied");
     }
 
     @ExceptionHandler(Exception.class)
     @WrapError(error = "Unhandled exception", apiStatus = ApiStatus.INTERNAL_SERVER_ERROR, status = HttpStatus.INTERNAL_SERVER_ERROR)
-    public Object handleException(Exception exception) {
-        exception.printStackTrace();
-        log.error("Unhandled exception");
-        return exception.getMessage();
+    public Object handleGenericException(Exception ex) {
+        return handle(ex, "Unhandled exception");
     }
 
 }
