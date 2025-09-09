@@ -6,6 +6,6 @@ import java.io.Serializable;
 
 public record RoleResponse(
         String roleId,
-        Roles name
+        Roles role
 ) implements Serializable {
 }
