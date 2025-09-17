@@ -4,15 +4,16 @@ import com.rakshi.bank.domains.enums.CustomerType;
 import com.rakshi.bank.domains.enums.Gender;
 import com.rakshi.bank.domains.enums.KycStatus;
 import com.rakshi.bank.domains.utils.ConvertBooleanAttributes;
-import com.rakshi.bank.domains.utils.CustomIdGenerator;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -21,13 +22,23 @@ import java.util.Set;
 @Builder
 @Setter
 @Getter
-@Table(name = "users", indexes = {
-        @Index(name = "idx_user_email", columnList = "email", unique = true),
-        @Index(name = "idx_user_phone", columnList = "phoneNumber", unique = true)
-})
+@Table(
+        name = "users",
+        indexes = {
+                @Index(name = "idx_user_email", columnList = "email", unique = true),
+                @Index(name = "idx_user_phone", columnList = "phoneNumber", unique = true)
+        }
+)
 public class User implements Serializable {
+
     @Id
+    @GeneratedValue(generator = "cust-id-generator")
+    @GenericGenerator(
+            name = "cust-id-generator",
+            strategy = "com.rakshi.bank.domains.utils.CustomIdGenerator"
+    )
     private String userId;
+
     private String firstName;
     private String lastName;
     private LocalDate dateOfBirth;
@@ -38,9 +49,12 @@ public class User implements Serializable {
     private String password;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<Role> roles;
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles = new HashSet<>();
 
     private String nationality;
     private String email;
@@ -66,10 +80,10 @@ public class User implements Serializable {
     private boolean twoFactorEnabled;
 
     @Enumerated(EnumType.STRING)
-    private KycStatus kycStatus;
+    private KycStatus kycStatus = KycStatus.NOT_INITIALIZED;
 
     @Enumerated(EnumType.STRING)
-    private CustomerType customerType;
+    private CustomerType customerType = CustomerType.INDIVIDUAL;
 
     private LocalDateTime lastLoginAt;
     private int failedLoginAttempts;
@@ -85,21 +99,4 @@ public class User implements Serializable {
 
     @Embedded
     private Address address;
-
-
-    //   TODO : id is getting started from 0 again after restarting the server, need to fix this
-    @PrePersist
-    private void generateUserId() {
-        if (this.userId == null)
-            userId = String.format("CUST%08d", CustomIdGenerator.USER_ID_GENERATOR.incrementAndGet());
-        this.kycStatus = KycStatus.NOT_INITIALIZED;
-        this.verified = false;
-        this.blocked = false;
-        this.locked = false;
-        this.active = true;
-        this.deleted = false;
-        this.failedLoginAttempts = 0;
-        this.twoFactorEnabled = false;
-    }
-
 }

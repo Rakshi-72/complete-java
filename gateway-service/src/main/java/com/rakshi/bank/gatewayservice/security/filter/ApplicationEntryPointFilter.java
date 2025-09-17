@@ -27,6 +27,7 @@ public class ApplicationEntryPointFilter implements WebFilter {
     private static final String BEARER_PREFIX = "Bearer ";
     private static final String USERNAME_HEADER = "x-username";
     private static final String ROLES_HEADER = "x-roles";
+    private static final String USER_ID = "x-user-id";
     private static final String ERROR_JSON_FORMAT = "{\"error\": \"%s\"}";
 
     private final JwtUtil jwtUtil;
@@ -59,7 +60,9 @@ public class ApplicationEntryPointFilter implements WebFilter {
             ServerWebExchange mutatedExchange = exchange.mutate()
                     .request(builder -> builder
                             .header(USERNAME_HEADER, jwtUtil.extractUsername(claims))
-                            .header(ROLES_HEADER, jwtUtil.getRoles(claims)))
+                            .header(ROLES_HEADER, jwtUtil.getRoles(claims))
+                            .header(USER_ID, jwtUtil.getUserId(claims))
+                    )
                     .build();
 
             return chain.filter(mutatedExchange);
