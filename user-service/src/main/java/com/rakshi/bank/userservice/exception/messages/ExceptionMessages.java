@@ -10,4 +10,5 @@ public interface ExceptionMessages {
     String USER_REGISTRATION_FAILED = "User registration failed";
     String INVALID_IDENTITY = "Invalid identity %s";
     String PERMISSION_DENIED = "Permission denied";
+    String ROLE_NOT_FOUND = "Role not found : %s";
 }

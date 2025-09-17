@@ -3,12 +3,14 @@ package com.rakshi.bank.gatewayservice.security.jwt;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtUtil {
 
     private final SecretKey key;
@@ -21,13 +23,12 @@ public class JwtUtil {
         return claims.get("roles", String.class);
     }
 
+    public String getUserId(Claims claims) {
+        return claims.get("user_id", String.class);
+    }
+
     private Claims getClaimsFromToken(String token) {
-        return Jwts
-                .parser()
-                .verifyWith(key)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+        return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
     }
 
     public Claims validateToken(String authToken) {

@@ -4,6 +4,7 @@ import com.rakshi.bank.authservice.service.UserService;
 import com.rakshi.bank.domains.dto.request.LoginRequest;
 import com.rakshi.bank.domains.enums.Roles;
 import com.rakshi.bank.domains.models.Role;
+import com.rakshi.bank.domains.models.User;
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +39,8 @@ public class JwtUtil {
         Instant now = Instant.now();
         Duration duration = Duration.ofMinutes(EXPIRATION_TIME);
 
-        String roles = userService.findUserByIdentifier(username)
+        User user = userService.findUserByIdentifier(username);
+        String roles = user
                 .getRoles()
                 .stream()
                 .map(Role::getRole)
@@ -49,6 +51,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .claims(claims)
                 .subject(username)
+                .claim("user_id", user.getUserId())
                 .issuer(ISSUER)
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plus(duration)))
