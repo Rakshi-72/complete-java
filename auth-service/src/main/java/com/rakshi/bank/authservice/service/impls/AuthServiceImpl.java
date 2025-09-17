@@ -35,6 +35,7 @@ public class AuthServiceImpl implements AuthService {
         String jwt = jwtUtil.generateJwtToken(identifier, loginRequest);
         return ApiResponse
                 .builder()
+                .success(true)
                 .data(new JwtResponse(jwt))
                 .message("Authentication successful")
                 .status(ApiStatus.SUCCESS)

@@ -1,6 +1,6 @@
 package com.rakshi.bank.userservice.security.configuration;
 
-import com.rakshi.bank.userservice.security.ApplicationFilter;
+import com.rakshi.bank.userservice.security.filters.ApplicationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
