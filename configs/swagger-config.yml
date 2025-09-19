@@ -1,0 +1,16 @@
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    display-request-duration: true
+    urls-primary-name: secured-api
+    custom-css: |
+      .swagger-ui .info .title:after {
+        content: " 🔒 mTLS Required";
+        font-size: 0.6em;
+        color: #ff6b35;
+        font-weight: normal;
+      }

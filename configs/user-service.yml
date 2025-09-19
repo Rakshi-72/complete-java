@@ -13,6 +13,7 @@ spring:
     import:
       - eureka-config.yml
       - database-config.yml
+      - swagger-config.yml
   application:
     name: user-service
     jpa:
