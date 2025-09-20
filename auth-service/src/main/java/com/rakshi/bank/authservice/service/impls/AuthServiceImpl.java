@@ -19,22 +19,21 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
 
     @Override
-    public ApiResponse generateTokenEmail(LoginRequest loginRequest) {
+    public ApiResponse<JwtResponse> generateTokenEmail(LoginRequest loginRequest) {
         return getToken(loginRequest.email(), loginRequest.password(), loginRequest);
     }
 
     @Override
-    public ApiResponse generateTokenPhone(LoginRequest loginRequest) {
+    public ApiResponse<JwtResponse> generateTokenPhone(LoginRequest loginRequest) {
         return this.getToken(loginRequest.phone(), loginRequest.password(), loginRequest);
     }
 
-    private ApiResponse<Object> getToken(String identifier, String password, LoginRequest loginRequest) {
+    private ApiResponse<JwtResponse> getToken(String identifier, String password, LoginRequest loginRequest) {
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(identifier, password);
         this.authenticationManager.authenticate(authToken);
 
         String jwt = jwtUtil.generateJwtToken(identifier, loginRequest);
-        return ApiResponse
-                .builder()
+        return ApiResponse.<JwtResponse>builder()
                 .success(true)
                 .data(new JwtResponse(jwt))
                 .message("Authentication successful")
