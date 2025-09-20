@@ -20,7 +20,7 @@ public class UserUpdateService {
     @Caching(put = {
             @CachePut(value = "users", key = "#user.getEmail()"),
             @CachePut(value = "users", key = "#user.getPhoneNumber()"),
-            @CachePut(value = "users", key = "#user.getCustomerType()")
+            @CachePut(value = "users", key = "#user.getUserId()")
     })
     public User saveUser(User user) {
         return userRepository.save(user);
