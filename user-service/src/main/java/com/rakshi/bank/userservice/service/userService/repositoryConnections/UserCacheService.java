@@ -1,4 +1,4 @@
-package com.rakshi.bank.userservice.service.userService;
+package com.rakshi.bank.userservice.service.userService.repositoryConnections;
 
 import com.rakshi.bank.domains.models.User;
 import com.rakshi.bank.userservice.repository.UserRepository;
