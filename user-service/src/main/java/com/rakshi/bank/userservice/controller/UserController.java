@@ -147,4 +147,17 @@ public class UserController {
         return userService.findByIdentity(identity);
     }
 
+    @GetMapping("/current")
+    @WrapData(message = "user found")
+    public Object getCurrentLoggedInUser() {
+        return userService.getCurrentlyLoggedInUser();
+    }
+
+    @GetMapping("/deActivate")
+    public Object deleteUser() {
+
+        return userService.deActivateCurrentUserAccount();
+
+    }
+
 }
