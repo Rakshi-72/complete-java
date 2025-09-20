@@ -29,9 +29,9 @@ public class WrapperAop {
         ApiResponse<Object> response = ApiResponse
                 .builder()
                 .data(result)
-//                .message(annotation.message())
+                .message(annotation.message())
                 .success(annotation.success())
-                .status(annotation.apiStatus())
+//                .status(annotation.apiStatus())
                 .timestamp(LocalDateTime.now())
                 .build();
 
