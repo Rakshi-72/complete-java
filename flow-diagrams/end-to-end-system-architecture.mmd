@@ -1,0 +1,88 @@
+flowchart TB
+    %% External actors
+    subgraph Clients[Clients & Consumer Channels]
+        WEB[Web / Mobile Clients]
+        ADMIN[Ops / Admin Tools]
+    end
+
+    %% Edge and platform
+    subgraph Edge[Edge & Platform Services]
+        GW[Gateway Service\n(Spring Cloud Gateway)]
+        DISC[Service Discovery\n(Eureka)]
+        CFG[Config Server\n(Spring Cloud Config)]
+    end
+
+    %% Core business services
+    subgraph Services[Core Microservices]
+        AUTH[Auth Service\n(JWT Issuance & Validation)]
+        USER[User Service\n(User Profile, Roles, Validation)]
+        ACC[Account Service\n(Account Operations)]
+    end
+
+    %% Shared components
+    subgraph Shared[Shared Libraries & Contracts]
+        DOM[domains module\n(Shared Models & DTOs)]
+    end
+
+    %% Config and security assets
+    subgraph RuntimeAssets[Runtime Configuration & Security Assets]
+        REPO[configs/\nExternalized YAML Config]
+        CERTS[certificates/\nKeystores & Truststores]
+    end
+
+    %% Data stores
+    subgraph Data[Persistence Layer]
+        UDB[(User DB)]
+        ADB[(Account DB)]
+    end
+
+    %% Traffic flow
+    WEB -->|HTTPS| GW
+    ADMIN -->|HTTPS| GW
+
+    GW -->|/api/auth/**| AUTH
+    GW -->|/api/users/**| USER
+    GW -->|/api/accounts/**| ACC
+
+    %% Service discovery and config interactions
+    GW -.register/fetch.-> DISC
+    AUTH -.register/fetch.-> DISC
+    USER -.register/fetch.-> DISC
+    ACC -.register/fetch.-> DISC
+    CFG -.register/fetch.-> DISC
+
+    GW -.config refresh.-> CFG
+    AUTH -.config refresh.-> CFG
+    USER -.config refresh.-> CFG
+    ACC -.config refresh.-> CFG
+
+    CFG -->|reads centralized config| REPO
+
+    %% Security and identity propagation
+    CERTS --> GW
+    CERTS --> AUTH
+    CERTS --> USER
+    CERTS --> ACC
+
+    AUTH -->|JWT / identity claims| GW
+    GW -->|x-username, x-roles headers| USER
+    GW -->|identity context headers| ACC
+
+    %% Service internals
+    USER --> UDB
+    ACC --> ADB
+
+    %% Shared contract dependency
+    AUTH -.uses DTOs/models.-> DOM
+    USER -.uses DTOs/models.-> DOM
+    ACC -.uses DTOs/models.-> DOM
+
+    classDef infra fill:#EAF3FF,stroke:#4A78C2,color:#0B2E67;
+    classDef core fill:#EFFFF4,stroke:#2B8A57,color:#14532D;
+    classDef shared fill:#FFF8E8,stroke:#D88A1D,color:#7A4A00;
+    classDef data fill:#FCEEFF,stroke:#A855F7,color:#5B21B6;
+
+    class GW,DISC,CFG infra;
+    class AUTH,USER,ACC core;
+    class DOM,REPO,CERTS shared;
+    class UDB,ADB data;
